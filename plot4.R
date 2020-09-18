@@ -1,0 +1,26 @@
+data <- fread(cmd = "grep -E '1/2/2007|2/2/2007' household_power_consumption.txt", sep = ';',col.names = c("Date","Time","Global_active_power","Global_reactive_power","Voltage","Global_intensity","Sub_metering_1","Sub_metering_2","Sub_metering_3"), colClasses = c(rep("character", 2), rep("numeric",7)), na = "?")
+data$y <- paste(data$Date,data$Time)
+date_time <- strptime(data$y, "%d/%m/%Y %H:%M:%S")
+data <- data %>% mutate(date_time)
+png(filename = "plot4.png", width = 480, height = 480, units = "px")
+par(mfrow = c(2, 2))
+# Top - Left
+plot(data$date_time, data$Global_active_power, type = "l", xlab = "", ylab = "Global Active Power (kilowatts)", xaxt = "n")
+lines(data$date_time, data$Global_active_power, col = "black")
+axis(side = 1, at = c(1, 1441, 2880), labels = c("Thu", "Fri", "Sat"))
+# Top - Right
+plot(data$date_time, data$Voltage, type = "l", xlab = "datetime", ylab = "Voltage", xaxt = "n")
+lines(data$date_time, data$Voltage, col = "black")
+axis(side = 1, at = c(1, 1441, 2880), labels = c("Thu", "Fri", "Sat"))
+# Bottom - Left
+plot(data$date_time, data$Sub_metering_1, type = "l", col = "black", xlab = "", ylab = "Energy sub metering", xaxt = "n")
+lines(data$date_time, data$Sub_metering_1, col = "black")
+lines(data$date_time, data$Sub_metering_2, col = "red")
+lines(data$date_time, data$Sub_metering_3, col = "blue")
+legend("topright", bty = "n", col = c("black", "red", "blue"), c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), lwd = 1)
+axis(side = 1, at = c(1, 1441, 2880), labels = c("Thu", "Fri", "Sat"))
+# Bottom - Right
+plot(data$date_time, data$Global_reactive_power, type = "l", col = "black", xlab = "datetime", ylab = colnames(data)[3], xaxt = "n")
+lines(data$date_time, data$Global_reactive_power, col = "black")
+axis(side = 1, at = c(1, 1441, 2880), labels = c("Thu", "Fri", "Sat"))
+dev.off()
